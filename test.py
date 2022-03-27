@@ -1,19 +1,7 @@
-import asyncio
-import time
+from decouple import config
 
+api_key = config('binance_key')
+api_secret = config('binance_secret')
 
-async def count():
-    print("One")
-    await asyncio.sleep(1)
-    print("Two")
-
-
-async def main():
-    await asyncio.gather(count(), count(), count())
-
-
-if __name__ == "__main__":
-    s = time.perf_counter()
-    asyncio.run(main())
-    elapsed = time.perf_counter() - s
-    print(f"This file was executed in {elapsed:0.2f} seconds.")
+print(api_key)
+print(api_secret)
