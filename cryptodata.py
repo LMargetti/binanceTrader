@@ -1,23 +1,17 @@
 # imports
 from binance.client import Client
+from decouple import config
 
-import asyncio
-import os
 
-api_key = os.environ.get('binance_key')
-api_secret = os.environ.get('binance_secret')
+def main():
+    test_key = config('test_key')
+    test_secret = config('test_secret')
 
-print(api_key)
-print(api_secret)
+    # initialise the client
+    client = Client(test_key, test_secret)
+    client.API_URL = 'https://testnet.binance.vision/api'
+    print(client.get_asset_balance(asset="BTC"))
 
-# async functions
-# async def main():
-#
-#     # initialise the client
-#     client = await AsyncClient.create(api_key=api_key,
-#                                       api_secret=api_secret)
-#
-# if __name__ == "__main__":
-#
-#     loop = asyncio.get_event_loop()
-#     loop.run_until_complete(main())
+
+if __name__ == "__main__":
+    main()
