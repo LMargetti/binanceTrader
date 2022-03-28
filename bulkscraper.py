@@ -175,6 +175,18 @@ def main():
 
     return
 
+# .csv file headers
+# --- aggTrades:
+# 1)Aggregate   2)tradeId	 3)Price	4)Quantity
+# 5)First tradeId   6)Last tradeId  7)Timestamp  8)Was the buyer the maker
+# 9)Was the trade the best price match
+# --- klines:
+# 1)Open time   2)Open  3)High	4)Low	5)Close
+# 6)Volume	7)Close time    8)Quote asset volume	9)Number of trades
+# 10)Taker buy base asset volume    11) Taker buy quote asset volume	12)Ignore
+# --- trades:
+# 1)trade Id	2)price    3)qty	4)quoteQty    5)time    6)isBuyerMaker    7)isBestMatch
+
 
 if __name__ == '__main__':
     main()
