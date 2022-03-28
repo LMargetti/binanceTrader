@@ -138,12 +138,30 @@ def get_crypto_history(trade_pair: str, date: list, data_type: str = "klines", t
         wget.download(url, file_dir)
         print(f"Download of {file_name} was successful.")
         print(f"Find {file_name} in {file_dir}")
+
+        with zipfile.ZipFile(file_dir, 'r') as zip_ref:
+            zip_ref.extractall(dataDirectory)
+        print(f"{file_name} has been unzipped")
+        try:
+            os.remove(file_dir)
+            print(f"{file_name} has been removed")
+        except:
+            print(f"{file_name} could not be deleted")
         # return
     except:
         print(f"Download unsuccessful.")
 
-    with zipfile.ZipFile(file_dir, 'r') as zip_ref:
-        zip_ref.extractall(dataDirectory)
+
+def get_yearly_history(trade_pair: str, year: str, data_type: str = "klines", time_interval: str = "5m"):
+    for i in range(12):
+        if i < 9:
+            month = "0" + f"{i + 1}"
+        else:
+            month = f"{i + 1}"
+        try:
+            get_crypto_history(trade_pair, [year, month], data_type, time_interval)
+        except:
+            print(f"Data for month {month} was not able to be collected.")
 
 
 def main():
