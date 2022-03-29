@@ -152,3 +152,6 @@ current_MA = SMA(clean_test, 30, apply_to_column=False)
 sma_test_df.plot()
 
 plt.show()
+# Plot was successful and accurate, however everything plotted as a line, so it was easily very messy.
+# -> need to change plot to a candle / side-ways cat and whiskers diagram
+# -> make utils package and make individual classes in individual modules

@@ -1,5 +1,8 @@
-import ccxt
-import bulkscraper
+from pathlib import Path
 
-# bulkscraper.get_crypto_history("BNBUSDT", ["2022", "02"])
-# bulkscraper.get_yearly_history("BNBUSDT", "2021")
+cwd = Path.cwd()
+# print(cwd.stem)
+print(cwd.parents[0].stem)
+
+# for par in list(cwd.parents):
+#     print(par.stem)
