@@ -13,6 +13,8 @@ base_url = "https://data.binance.vision/data"
 trade_type = "spot"
 
 
+# USER INPUTS #
+# Realistically useless functions, but it was good practice.
 def get_user_variables():
     """
     Takes user input to assign values for all the required options.
@@ -91,6 +93,8 @@ def get_scale_value(scale, digits):
         print("Incorrect format")
 
 
+# CRYPTO HISTORY SCRAPERS #
+# Actually useful functions
 def get_crypto_history(trade_pair: str, date: list, data_type: str = "klines", time_interval: str = "5m"):
     """
     Downloads the historical crypto data specified by the function parameters:
@@ -100,16 +104,31 @@ def get_crypto_history(trade_pair: str, date: list, data_type: str = "klines", t
                  trades (record of all trades / tick data)
     > Time interval: 1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d, 3d, 1w, 1mo
     > Date: ['YYYY','MM'] for monthly or ['YYYY', 'MM', 'DD'] for daily
+    If the data type is aggTrades or trades, then only daily time scales are allowed,
+    since these data types take up too much storage per file.
+    @return: os.path object
     """
-
-    if len(date) == 2:
-        time_scale = "monthly"
-    else:
+    if data_type == "klines":  # klines are much nicer (at least for 5m intervals) with ~1.2 MB per monthly file
+        if len(date) == 2:
+            time_scale = "monthly"
+        else:
+            time_scale = "daily"
+    else:  # aggTrades and trades contain too much data per month (538 MB for one file!)
+        if len(date) == 2:
+            date.append("01")
         time_scale = "daily"
 
-    # Building the file name #
     # Parameters
-    file_parameters = [time_interval]
+    if data_type == "klines":
+        file_parameters = [time_interval]
+        url_parameters = [trade_type, time_scale,
+                          data_type, trade_pair, time_interval]
+    else:
+        file_parameters = [data_type]
+        url_parameters = [trade_type, time_scale,
+                          data_type, trade_pair]
+
+    # Building the file name #
     for scale in date:
         file_parameters.append(scale)
 
@@ -118,11 +137,10 @@ def get_crypto_history(trade_pair: str, date: list, data_type: str = "klines", t
     for par in file_parameters:
         file_param_name = "-" + str(par)
         file_name += file_param_name
+    final_file = file_name + ".csv"
     file_name += ".zip"
 
     # Building the url #
-    url_parameters = [trade_type, time_scale,
-                      data_type, trade_pair, time_interval]
     url = str(base_url)
     for par in url_parameters:
         url_param_dir = "/" + str(par)
@@ -133,23 +151,30 @@ def get_crypto_history(trade_pair: str, date: list, data_type: str = "klines", t
 
     # Building file directory #
     file_dir = os.path.join(dataDirectory, file_name)
+    final_dir = os.path.join(dataDirectory, final_file)  # just to return
     # print(file_dir)
-    try:
-        wget.download(url, file_dir)
-        print(f"Download of {file_name} was successful.")
-        print(f"Find {file_name} in {file_dir}")
-
-        with zipfile.ZipFile(file_dir, 'r') as zip_ref:
-            zip_ref.extractall(dataDirectory)
-        print(f"{file_name} has been unzipped")
+    file_doesnt_exist = not os.path.exists(final_dir)
+    if file_doesnt_exist:
         try:
-            os.remove(file_dir)
-            print(f"{file_name} has been removed")
+            wget.download(url, file_dir)
+            print(f"Download of {file_name} was successful.")
+            # print(f"Find {file_name} in {file_dir}")
+
+            with zipfile.ZipFile(file_dir, 'r') as zip_ref:
+                zip_ref.extractall(dataDirectory)
+            print(f"{file_name} has been unzipped")
+            try:
+                os.remove(file_dir)
+                print(f"{file_name} has been removed")
+                print(f"Find {final_file} in {final_dir}")
+            except:
+                print(f"{file_name} could not be deleted")
+            # return
         except:
-            print(f"{file_name} could not be deleted")
-        # return
-    except:
-        print(f"Download unsuccessful.")
+            print(f"Download unsuccessful.")
+    else:
+        print(f"{final_file} already exists.")
+    return final_dir
 
 
 def get_yearly_history(trade_pair: str, year: str, data_type: str = "klines", time_interval: str = "5m"):
@@ -164,6 +189,8 @@ def get_yearly_history(trade_pair: str, year: str, data_type: str = "klines", ti
             print(f"Data for month {month} was not able to be collected.")
 
 
+# MAIN #
+# Nothing really exciting here...
 def main():
     parameters = get_user_variables()
     if parameters:
@@ -174,6 +201,7 @@ def main():
         get_crypto_history(trade_pair=pair, date=date, data_type=data_type, time_interval=interval)
 
     return
+
 
 # .csv file headers
 # --- aggTrades:
