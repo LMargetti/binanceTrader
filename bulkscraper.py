@@ -1,13 +1,10 @@
-
-
-import os.path
+from utils import UserInputMethods
+from pathlib import Path
 import wget
 import zipfile
 
 # file path
-absolutepath = os.path.abspath(__file__)
-fileDirectory = os.path.dirname(absolutepath)
-dataDirectory = os.path.join(fileDirectory, 'cryptodata')
+dataDirectory = Path.cwd() / 'cryptodata'
 
 # default url variables
 base_url = "https://data.binance.vision/data"
@@ -71,23 +68,21 @@ def get_crypto_history(trade_pair: str, date: list, data_type: str = "klines", t
     # print(url)
 
     # Building file directory #
-    file_dir = os.path.join(dataDirectory, file_name)
-    final_dir = os.path.join(dataDirectory, final_file)  # just to return
+    file_dir = dataDirectory / file_name
+    final_dir = dataDirectory / final_file
     # print(file_dir)
-    file_doesnt_exist = not os.path.exists(final_dir)
-    if file_doesnt_exist:
+    if not final_dir.isfile():
         try:
             wget.download(url, file_dir)
             print(f"Download of {file_name} was successful.")
-            # print(f"Find {file_name} in {file_dir}")
 
             with zipfile.ZipFile(file_dir, 'r') as zip_ref:
                 zip_ref.extractall(dataDirectory)
             print(f"{file_name} has been unzipped")
             try:
-                os.remove(file_dir)
+                file_dir.unlink()
                 print(f"{file_name} has been removed")
-                print(f"Find {final_file} in {final_dir}")
+                print(f"Find {final_file} in {str(final_dir)}")
             except:
                 print(f"{file_name} could not be deleted")
             # return

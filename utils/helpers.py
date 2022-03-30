@@ -1,58 +1,30 @@
 from datetime import datetime
+from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
-import os.path
 
 # file path
-absolutepath = os.path.abspath(__file__)
-fileDirectory = os.path.dirname(absolutepath)
-dataDirectory = os.path.join(fileDirectory, 'cryptodata')
-testDirectory = "C:/Users/liamm/PycharmProjects/binanceTrader/binanceTrader/cryptodata/BNBUSDT-5m-2021-09.csv"
+dataDirectory = Path.cwd().parent / 'cryptodata'
 
 
-def get_file_dir(base_dir, trade_pair, date, trade_type, time_interval="5m"):
-    """
-    Takes all the required parameters to find the correct file.
-    @param trade_type: string
-    @param base_dir: string
-    @param trade_pair: string
-    @param time_interval: string
-    @param date: list
-    @return: string
-    """
-    if trade_type == "klines":
-        dir_vars = [time_interval]
-    else:
-        dir_vars = []
-    for i in date:
-        dir_vars.append(i)
-    file_name = trade_pair
-    for v in dir_vars:
-        var = "-" + v
-        file_name += var
-    file_name += ".csv"
-    file_dir = os.path.join(base_dir, file_name)
-    return file_dir
-
-
-def unix_to_datetime(total_ms):
+def unix_to_datetime(total_ms: int) -> str:
     """
     Converts unix millisecond timestamp to date and time in form: %Y/%m/%d %H:%M:%S
-    @param total_ms: integer
-    @return: string
+    @param total_ms: unix time
+    @return: UTC date and time
     """
     ts = round(total_ms / 1000)
     date = datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
     return date
 
 
-def csv_to_pd(file_dir, data_type="klines", print_result=False):
+def csv_to_pd(file_dir, data_type="klines", print_result=False) -> pd.DataFrame:
     """
     Converts a csv file of historical data to a pandas dataframe with the correct column names
     @param file_dir: string
     @param data_type: string
     @param print_result: boolean
-    @return: None
+    @return: Pandas dataframe from the csv file
     """
     headers = []
 
@@ -69,7 +41,7 @@ def csv_to_pd(file_dir, data_type="klines", print_result=False):
         headers = ["trade Id", "price", "qty", "quoteQty", "time", "isBuyerMaker", "isBestMatch"]
 
     # creating dataframe
-    df = pd.read_csv(file_dir, header=0, names=headers)
+    df = pd.read_csv(str(file_dir), header=0, names=headers)
 
     # converting any timestamps to utc datetime and setting index
     if data_type == "klines":
@@ -141,17 +113,6 @@ def SMA(df: pd.DataFrame, window, apply_to_column=True, print_result=False):
 # MA, RSI (relative strength index), MACD, EMA
 
 
-test_df = csv_to_pd(testDirectory)
-
-clean_test = clean_kline_df(test_df, extra_default=["Volume"])
-
-sma_test_df = SMA(clean_test, 30)
-
-current_MA = SMA(clean_test, 30, apply_to_column=False)
-
-sma_test_df.plot()
-
-plt.show()
 # Plot was successful and accurate, however everything plotted as a line, so it was easily very messy.
 # -> need to change plot to a candle / side-ways cat and whiskers diagram
 # -> make utils package and make individual classes in individual modules
